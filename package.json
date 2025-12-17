@@ -1,12 +1,17 @@
 {
   "name": "gph",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "main": "electron-main.js",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --port 3000",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "electron": "electron .",
+    "electron:dev": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "ng build --configuration production && electron-builder build --mac",
+    "electron:build:mac": "ng build --configuration production && electron-builder build --mac --publish never"
   },
   "prettier": {
     "printWidth": 100,
@@ -36,8 +41,32 @@
     "@angular/build": "^21.0.3",
     "@angular/cli": "^21.0.3",
     "@angular/compiler-cli": "^21.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.gph.app",
+    "productName": "GPH",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron-main.js",
+      "electron-preload.js"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "src/assets/icon.icns"
+    }
   }
 }

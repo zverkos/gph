@@ -95,7 +95,17 @@ const STORAGE_KEYS = {
             </div>
           </div>
 
+
           <div class="stat-grid">
+            @if (isSettingsIncomplete()) {
+              <div class="settings-warning" (click)="openSettings()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="settings-warning-content">
+                  <span>{{ t('settingsWarning') }}</span>
+                  <button type="button" class="warning-btn">{{ t('openSettings') }}</button>
+                </div>
+              </div>
+            }
           <article class="stat-card accent">
             <p class="stat-card-label">{{ t('earned') }}</p>
             <p class="stat-card-value">
@@ -140,7 +150,7 @@ const STORAGE_KEYS = {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 }
               </button>
-              <button type="button" class="icon-btn" (click)="toggleSettings()" aria-label="Настройки">
+              <button type="button" class="icon-btn" (click)="openSettings()" aria-label="Настройки">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h.08a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.08a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <span class="header-divider"></span>
@@ -165,31 +175,31 @@ const STORAGE_KEYS = {
     </div>
 
     @if (settingsOpened()) {
-      <div class="settings-backdrop" role="dialog" aria-modal="true" aria-label="Настройки расчёта" (click)="toggleSettings()">
+      <div class="settings-backdrop" role="dialog" aria-modal="true" aria-label="Настройки расчёта" (click)="closeSettings()">
         <section class="settings-modal" (click)="$event.stopPropagation()">
           <header class="settings-panel__header">
             <p class="caption">{{ t('settings') }}</p>
-            <button type="button" class="icon-btn" (click)="toggleSettings()" aria-label="Закрыть">
+            <button type="button" class="icon-btn" (click)="closeSettings()" aria-label="Закрыть">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </button>
           </header>
-          <form class="settings-form" [formGroup]="earningsForm">
+          <form class="settings-form" [formGroup]="settingsForm">
             <div class="settings-row">
               <div class="field">
                 <span class="field-label">{{ t('language') }}</span>
                 <div class="mode-toggle">
-                  <button type="button" class="mode-button compact" [class.active]="controls.language.value === 'ru'" (click)="setLanguage('ru')">RU</button>
-                  <button type="button" class="mode-button compact" [class.active]="controls.language.value === 'en'" (click)="setLanguage('en')">EN</button>
-                  <button type="button" class="mode-button compact" [class.active]="controls.language.value === 'zh'" (click)="setLanguage('zh')">中文</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'ru'" (click)="settingsControls.language.setValue('ru')">RU</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'en'" (click)="settingsControls.language.setValue('en')">EN</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'zh'" (click)="settingsControls.language.setValue('zh')">中文</button>
                 </div>
               </div>
               <div class="field">
                 <span class="field-label">{{ t('currency') }}</span>
                 <div class="mode-toggle">
-                  <button type="button" class="mode-button compact" [class.active]="controls.currency.value === 'RUB'" (click)="controls.currency.setValue('RUB')">₽</button>
-                  <button type="button" class="mode-button compact" [class.active]="controls.currency.value === 'USD'" (click)="controls.currency.setValue('USD')">$</button>
-                  <button type="button" class="mode-button compact" [class.active]="controls.currency.value === 'EUR'" (click)="controls.currency.setValue('EUR')">€</button>
-                  <button type="button" class="mode-button compact" [class.active]="controls.currency.value === 'CNY'" (click)="controls.currency.setValue('CNY')">¥</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'RUB'" (click)="settingsControls.currency.setValue('RUB')">₽</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'USD'" (click)="settingsControls.currency.setValue('USD')">$</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'EUR'" (click)="settingsControls.currency.setValue('EUR')">€</button>
+                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'CNY'" (click)="settingsControls.currency.setValue('CNY')">¥</button>
                 </div>
               </div>
             </div>
@@ -197,8 +207,8 @@ const STORAGE_KEYS = {
             <div class="field">
               <span class="field-label">{{ t('calculationMode') }}</span>
               <div class="mode-toggle">
-                <button type="button" class="mode-button" [class.active]="calculationMode() === 'income'" (click)="controls.calculationMode.setValue('income')">{{ t('byIncome') }}</button>
-                <button type="button" class="mode-button" [class.active]="calculationMode() === 'hours'" (click)="controls.calculationMode.setValue('hours')">{{ t('byHours') }}</button>
+                <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'income'" (click)="settingsControls.calculationMode.setValue('income')">{{ t('byIncome') }}</button>
+                <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'hours'" (click)="settingsControls.calculationMode.setValue('hours')">{{ t('byHours') }}</button>
               </div>
             </div>
 
@@ -207,14 +217,14 @@ const STORAGE_KEYS = {
               <input type="text" inputmode="decimal" formControlName="hourlyRate" placeholder="0" />
             </div>
 
-            @if (calculationMode() === 'income') {
+            @if (settingsControls.calculationMode.value === 'income') {
               <div class="field">
                 <span class="field-label">{{ t('desiredIncome') }}</span>
                 <input type="text" inputmode="decimal" formControlName="desiredMonthlyIncome" placeholder="0" />
               </div>
             }
 
-            @if (calculationMode() === 'hours') {
+            @if (settingsControls.calculationMode.value === 'hours') {
               <div class="field">
                 <span class="field-label">{{ t('hoursPerDay') }}</span>
                 <input type="text" inputmode="decimal" formControlName="hoursPerDay" placeholder="0" />
@@ -230,6 +240,8 @@ const STORAGE_KEYS = {
               <input type="checkbox" id="start-from-sunday" formControlName="startFromSunday" />
               <label for="start-from-sunday">{{ t('startFromSunday') }}</label>
             </div>
+
+            <button type="button" class="primary-button" (click)="saveSettings()">{{ t('save') }}</button>
           </form>
         </section>
       </div>
@@ -323,7 +335,7 @@ export class App {
     if (this.addTaskDialogOpen()) this.addTaskDialogOpen.set(false);
     else if (this.editingTask()) this.closeEditDialog();
     else if (this.deleteTaskId()) this.cancelDelete();
-    else if (this.settingsOpened()) this.toggleSettings();
+    else if (this.settingsOpened()) this.closeSettings();
   }
 
   // Date state
@@ -351,7 +363,7 @@ export class App {
     inTracker: [false]
   });
 
-  // Earnings form
+  // Earnings form (основная форма с сохранёнными значениями)
   earningsForm = this.fb.nonNullable.group({
     calculationMode: ['income' as 'income' | 'hours'],
     language: ['ru' as SupportedLang],
@@ -361,6 +373,26 @@ export class App {
     hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
     includeWeekends: [false],
     startFromSunday: [false]
+  });
+
+  // Settings form (временная форма для диалога)
+  settingsForm = this.fb.nonNullable.group({
+    calculationMode: ['income' as 'income' | 'hours'],
+    language: ['ru' as SupportedLang],
+    currency: ['RUB'],
+    hourlyRate: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
+    desiredMonthlyIncome: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
+    hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
+    includeWeekends: [false],
+    startFromSunday: [false]
+  });
+
+  get settingsControls() {
+    return this.settingsForm.controls;
+  }
+
+  readonly settingsFormMode = computed(() => {
+    return this.settingsControls.calculationMode.value as 'income' | 'hours';
   });
 
   get controls() {
@@ -446,7 +478,7 @@ export class App {
 
   readonly currencyDisplay = computed(() => 'symbol-narrow');
   readonly currencyDigits = computed(() => '1.0-0');
-  
+
   readonly currencyLocale = computed(() => {
     const currency = this.selectedCurrency();
     if (currency === 'CNY') return 'zh-CN';
@@ -490,6 +522,18 @@ export class App {
       }
     }
     return count;
+  });
+
+  readonly isSettingsIncomplete = computed(() => {
+    this.formValue();
+    const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
+    if (this.calculationMode() === 'income') {
+      const desiredIncome = parseFloat(String(this.controls.desiredMonthlyIncome.value).replace(',', '.')) || 0;
+      return hourlyRate === 0 || desiredIncome === 0;
+    } else {
+      const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 0;
+      return hoursPerDay === 0;
+    }
   });
 
   readonly summary = computed(() => {
@@ -555,7 +599,7 @@ export class App {
     // Electron: open settings on Cmd+,
     if (typeof window !== 'undefined' && (window as any).electron?.onOpenSettings) {
       (window as any).electron.onOpenSettings(() => {
-        this.settingsOpened.set(true);
+        this.openSettings();
       });
     }
   }
@@ -566,7 +610,7 @@ export class App {
   }
 
   setLanguage(lang: SupportedLang) {
-    this.controls.language.setValue(lang);
+    this.settingsControls.language.setValue(lang);
   }
 
   selectDate(iso: string) {
@@ -594,8 +638,18 @@ export class App {
     this.isDarkTheme.update((v) => !v);
   }
 
-  toggleSettings() {
-    this.settingsOpened.update((v) => !v);
+  openSettings() {
+    this.settingsForm.patchValue(this.earningsForm.getRawValue());
+    this.settingsOpened.set(true);
+  }
+
+  closeSettings() {
+    this.settingsOpened.set(false);
+  }
+
+  saveSettings() {
+    this.earningsForm.patchValue(this.settingsForm.getRawValue());
+    this.settingsOpened.set(false);
   }
 
   shareMonthResults() {
@@ -749,7 +803,7 @@ export class App {
     this.formValue();
     const totalHours = this.taskStore.totalHoursByDate(iso);
     const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
-    
+
     if (this.calculationMode() === 'income') {
       const desiredIncome = parseFloat(String(this.controls.desiredMonthlyIncome.value).replace(',', '.')) || 0;
       const workingDays = this.workingDaysInMonth();
@@ -768,9 +822,9 @@ export class App {
     const totalHours = this.taskStore.totalHoursByDate(iso);
     const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
     const earned = Math.round(totalHours * hourlyRate);
-    
+
     if (totalHours === 0) return '';
-    
+
     let tooltip = this.formatHoursAndMinutes(totalHours);
     if (hourlyRate > 0) {
       tooltip += ` • ${earned}${this.getCurrencySymbol()}`;
@@ -784,7 +838,7 @@ export class App {
     const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0);
     const startDate = new Date(firstDay);
     const startFromSunday = this.controls.startFromSunday.value;
-    
+
     // Расчет дня недели в зависимости от настройки
     // getDay() возвращает 0=Вс, 1=Пн, ..., 6=Сб
     let dayOfWeek: number;

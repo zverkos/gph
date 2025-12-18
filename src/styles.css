@@ -159,6 +159,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .task-list li {
@@ -500,6 +501,8 @@ body {
   padding: 3rem 2rem;
   text-align: center;
   color: var(--muted);
+  flex: 1;
+  height: 100%;
 }
 
 .empty-state-icon {
@@ -516,7 +519,7 @@ body {
 }
 
 .empty-state-action {
-  margin: 0.5rem 0 0;
+  margin: 2rem 0 0;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   color: var(--primary);
@@ -531,5 +534,83 @@ body {
 .empty-state-action:hover {
   background: var(--primary);
   color: #fff;
+}
+
+/* ===================== */
+/* Settings Warning      */
+/* ===================== */
+.settings-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 0.75rem;
+  color: #b45309;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.settings-warning-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.settings-warning:hover {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.settings-warning > svg {
+  flex-shrink: 0;
+  color: #f59e0b;
+  width: 60px;
+  height: 60px;
+}
+
+.settings-warning span {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.warning-btn {
+  padding: 0.35rem 0.75rem;
+  background: rgba(245, 158, 11, 0.2);
+  border: none;
+  border-radius: 0.5rem;
+  color: #b45309;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.warning-btn:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+[data-color-scheme="dark"] .settings-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+[data-color-scheme="dark"] .settings-warning svg {
+  color: #fbbf24;
+}
+
+[data-color-scheme="dark"] .warning-btn {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+[data-color-scheme="dark"] .warning-btn:hover {
+  background: rgba(245, 158, 11, 0.4);
 }
 

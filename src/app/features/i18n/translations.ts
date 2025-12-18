@@ -47,7 +47,9 @@ export const TRANSLATIONS = {
     delete: 'Удалить',
     editTask: 'Редактирование задачи',
     save: 'Сохранить',
-    copiedToClipboard: 'Скопировано в буфер обмена!'
+    copiedToClipboard: 'Скопировано в буфер обмена!',
+    settingsWarning: 'Заполните параметры дохода в настройках',
+    openSettings: 'Открыть настройки'
   },
   en: {
     monthResult: 'Month Result',
@@ -95,7 +97,9 @@ export const TRANSLATIONS = {
     delete: 'Delete',
     editTask: 'Edit Task',
     save: 'Save',
-    copiedToClipboard: 'Copied to clipboard!'
+    copiedToClipboard: 'Copied to clipboard!',
+    settingsWarning: 'Fill in income settings',
+    openSettings: 'Open Settings'
   },
   zh: {
     monthResult: '月度结果',
@@ -143,7 +147,9 @@ export const TRANSLATIONS = {
     delete: '删除',
     editTask: '编辑任务',
     save: '保存',
-    copiedToClipboard: '已复制到剪贴板！'
+    copiedToClipboard: '已复制到剪贴板！',
+    settingsWarning: '请填写收入设置',
+    openSettings: '打开设置'
   }
 } as const;
 

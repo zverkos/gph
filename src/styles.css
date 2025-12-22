@@ -91,6 +91,22 @@ body {
   box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
+/* Стили для иконки date picker */
+.task-form input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  filter: invert(0);
+}
+
+.task-form input[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+[data-color-scheme="dark"] .task-form input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 .time-inputs {
   display: flex;
   gap: 0.75rem;

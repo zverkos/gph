@@ -11,6 +11,11 @@ import { parseLocalDate } from '../../../utils/date.utils';
   template: `
     <form class="task-form" [formGroup]="taskForm" (ngSubmit)="submitTask()">
       <label>
+        <span class="field-label">{{ t('date') }}</span>
+        <input type="date" formControlName="date" />
+      </label>
+
+      <label>
         <span class="field-label">{{ t('taskDescription') }}</span>
         <textarea formControlName="title" placeholder="Например, консультация" rows="3"></textarea>
       </label>
@@ -50,6 +55,7 @@ export class TaskFormComponent {
   taskCreated = output<TaskEntry>();
 
   taskForm = this.fb.nonNullable.group({
+    date: ['', Validators.required],
     title: ['', Validators.required],
     hoursPart: ['', [Validators.pattern(/^\d*$/)]],
     minutesPart: ['', [Validators.pattern(/^\d*$/), Validators.max(59)]],
@@ -59,9 +65,17 @@ export class TaskFormComponent {
 
   constructor() {
     effect(() => {
-      // Reset form when date changes
-      this.selectedDate();
-      this.taskForm.reset();
+      // Update date field when selectedDate changes
+      const currentDate = this.selectedDate();
+      this.taskForm.patchValue({ date: currentDate });
+      // Reset other fields when date changes
+      this.taskForm.patchValue({
+        title: '',
+        hoursPart: '',
+        minutesPart: '',
+        link: '',
+        inTracker: false
+      });
     });
   }
 
@@ -78,7 +92,7 @@ export class TaskFormComponent {
 
     const task: TaskEntry = {
       id: crypto.randomUUID(),
-      date: this.selectedDate(),          // YYYY-MM-DD
+      date: value.date,                    // Дата из формы
       createdAt: new Date().toISOString(), // Время создания
       title: value.title,
       hours,
@@ -88,6 +102,6 @@ export class TaskFormComponent {
     };
 
     this.taskCreated.emit(task);
-    this.taskForm.reset();
+    this.taskForm.reset({ date: this.selectedDate() });
   }
 }

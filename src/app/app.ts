@@ -292,6 +292,10 @@ const STORAGE_KEYS = {
           </header>
           <form class="task-form" [formGroup]="editForm" (ngSubmit)="saveEditedTask()">
             <label>
+              <span class="field-label">{{ t('date') }}</span>
+              <input type="date" formControlName="date" />
+            </label>
+            <label>
               <span class="field-label">{{ t('taskDescription') }}</span>
               <textarea formControlName="title" rows="3"></textarea>
             </label>
@@ -356,6 +360,7 @@ export class App {
 
   // Edit form
   editForm = this.fb.nonNullable.group({
+    date: ['', Validators.required],
     title: [''],
     hoursPart: ['', [Validators.pattern(/^\d*$/)]],
     minutesPart: ['', [Validators.pattern(/^\d*$/), Validators.max(59)]],
@@ -744,6 +749,7 @@ export class App {
 
   openEditDialog(task: TaskEntry) {
     this.editForm.patchValue({
+      date: task.date,
       title: task.title,
       hoursPart: task.hours.toString(),
       minutesPart: task.minutes.toString(),
@@ -764,6 +770,7 @@ export class App {
     const hours = parseInt(value.hoursPart || '0', 10);
     const minutes = parseInt(value.minutesPart || '0', 10);
     this.taskStore.update(task.id, {
+      date: value.date,
       title: value.title,
       hours,
       minutes,

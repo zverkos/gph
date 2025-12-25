@@ -205,16 +205,16 @@ const STORAGE_KEYS = {
             </div>
 
             <div class="field">
+              <span class="field-label">{{ t('hourlyRate') }}</span>
+              <input type="text" inputmode="decimal" formControlName="hourlyRate" placeholder="0" />
+            </div>
+
+            <div class="field">
               <span class="field-label">{{ t('calculationMode') }}</span>
               <div class="mode-toggle">
                 <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'income'" (click)="settingsControls.calculationMode.setValue('income')">{{ t('byIncome') }}</button>
                 <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'hours'" (click)="settingsControls.calculationMode.setValue('hours')">{{ t('byHours') }}</button>
               </div>
-            </div>
-
-            <div class="field">
-              <span class="field-label">{{ t('hourlyRate') }}</span>
-              <input type="text" inputmode="decimal" formControlName="hourlyRate" placeholder="0" />
             </div>
 
             @if (settingsControls.calculationMode.value === 'income') {

@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.possible-card {
+  &:hover {
+    border-color: var(--border-color);
+  }
+
+  .stat-card-sub {
+    margin-left: 0.25rem;
+  }
+}

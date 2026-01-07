@@ -131,6 +131,19 @@ const STORAGE_KEYS = {
               <p class="stat-card-value">{{ remainingDaysInMonth() }} <span class="stat-card-sub">{{ t('of') }} {{ workingDaysInMonth() }} {{ t('days') }}</span></p>
             </article>
           }
+
+          @if (remainingDaysInMonth() > 0) {
+            <article class="stat-card">
+              <p class="stat-card-label">{{ t('possible') }}</p>
+              <p class="stat-card-value">
+                {{ possibleRemainingPotential() | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}
+                <span class="stat-card-sub">
+                  {{ t('for') }} {{ remainingDaysInMonth() }}
+                  {{ currentLang() === 'ru' ? formatDayWord(remainingDaysInMonth()) : t('days') }}
+                </span>
+              </p>
+            </article>
+          }
           </div>
         </div>
       </aside>
@@ -334,6 +347,8 @@ export class App {
   private readonly taskStore = inject(TaskStore);
   private readonly translationService = inject(TranslationService);
 
+  readonly currentLang = computed(() => this.translationService.currentLang());
+
   @HostListener('document:keydown.escape')
   onEscape() {
     if (this.addTaskDialogOpen()) this.addTaskDialogOpen.set(false);
@@ -481,6 +496,16 @@ export class App {
     return this.controls.currency.value;
   });
 
+  readonly possibleHourlyRate = computed(() => {
+    this.formValue();
+    return parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
+  });
+
+  readonly possibleHoursPerDay = computed(() => {
+    this.formValue();
+    return parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 8;
+  });
+
   readonly currencyDisplay = computed(() => 'symbol-narrow');
   readonly currencyDigits = computed(() => '1.0-0');
 
@@ -490,6 +515,18 @@ export class App {
     if (currency === 'USD') return 'en-US';
     if (currency === 'EUR') return 'de-DE';
     return 'ru-RU';
+  });
+
+  readonly possibleRemainingPotential = computed(() => {
+    const remainingDays = this.remainingDaysInMonth();
+    if (!Number.isFinite(remainingDays) || remainingDays <= 0) return 0;
+
+    const hourlyRate = this.possibleHourlyRate();
+    const hoursPerDay = this.possibleHoursPerDay();
+    if (!Number.isFinite(hourlyRate) || hourlyRate <= 0) return 0;
+    if (!Number.isFinite(hoursPerDay) || hoursPerDay <= 0) return 0;
+
+    return Math.round(hourlyRate * hoursPerDay * remainingDays);
   });
 
   readonly remainingDaysInMonth = computed(() => {

@@ -24,10 +24,8 @@ type CalendarDay = {
 
 const WEEKDAY_LABELS_RU: ReadonlyArray<string> = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const WEEKDAY_LABELS_EN: ReadonlyArray<string> = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const WEEKDAY_LABELS_ZH: ReadonlyArray<string> = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 const WEEKDAY_LABELS_RU_SUN: ReadonlyArray<string> = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 const WEEKDAY_LABELS_EN_SUN: ReadonlyArray<string> = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const WEEKDAY_LABELS_ZH_SUN: ReadonlyArray<string> = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 const DECIMAL_INPUT_PATTERN = /^$|^\d+(?:,\d+)?$/;
 type EarningsControlName = 'hourlyRate' | 'hoursWorked' | 'hoursPerDay';
@@ -106,35 +104,39 @@ const STORAGE_KEYS = {
                 </div>
               </div>
             }
-          <article class="stat-card accent">
-            <p class="stat-card-label">{{ t('earned') }}</p>
-            <p class="stat-card-value">
-              {{ summary().amountEarned | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}
-              <span class="stat-card-sub">{{ t('of') }} {{ summary().maxPossibleIncome | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}</span>
-            </p>
-            <div class="progress">
-              <div class="progress-fill" [style.width.%]="summary().progress"></div>
-            </div>
-          </article>
-          <article class="stat-card">
-            <p class="stat-card-label">{{ t('worked') }}</p>
-            <p class="stat-card-value">
-              {{ formatHoursAndMinutes(summary().hoursWorked) }}
-              <span class="stat-card-sub">{{ t('of') }} {{ formatHoursAndMinutes(summary().totalHoursNeeded) }}</span>
-            </p>
-          </article>
-          @if (remainingDaysInMonth() > 0) {
+          @if (controls.showEarned.value) {
+            <article class="stat-card accent">
+              <p class="stat-card-label">{{ t('earned') }}</p>
+              <p class="stat-card-value">
+                {{ summary().amountEarned | number:'1.0-0' }} {{ getCurrencySymbol() }}
+                <span class="stat-card-sub">{{ t('of') }} {{ summary().maxPossibleIncome | number:'1.0-0' }} {{ getCurrencySymbol() }}</span>
+              </p>
+              <div class="progress">
+                <div class="progress-fill" [style.width.%]="summary().progress"></div>
+              </div>
+            </article>
+          }
+          @if (controls.showWorked.value) {
+            <article class="stat-card">
+              <p class="stat-card-label">{{ t('worked') }}</p>
+              <p class="stat-card-value">
+                {{ formatHoursAndMinutes(summary().hoursWorked) }}
+                <span class="stat-card-sub">{{ t('of') }} {{ formatHoursAndMinutes(summary().totalHoursNeeded) }}</span>
+              </p>
+            </article>
+          }
+          @if (remainingDaysInMonth() > 0 && controls.showRemaining.value) {
             <article class="stat-card">
               <p class="stat-card-label">{{ t('remaining') }}</p>
               <p class="stat-card-value">{{ remainingDaysInMonth() }} <span class="stat-card-sub">{{ t('of') }} {{ workingDaysInMonth() }} {{ t('days') }}</span></p>
             </article>
           }
 
-          @if (remainingDaysInMonth() > 0) {
+          @if (remainingDaysInMonth() > 0 && controls.showPossible.value) {
             <article class="stat-card">
               <p class="stat-card-label">{{ t('possible') }}</p>
               <p class="stat-card-value">
-                {{ possibleRemainingPotential() | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}
+                {{ possibleRemainingPotential() | number:'1.0-0' }} {{ getCurrencySymbol() }}
                 <span class="stat-card-sub">
                   {{ t('for') }} {{ remainingDaysInMonth() }}
                   {{ currentLang() === 'ru' ? formatDayWord(remainingDaysInMonth()) : t('days') }}
@@ -201,16 +203,6 @@ const STORAGE_KEYS = {
                 <div class="mode-toggle">
                   <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'ru'" (click)="settingsControls.language.setValue('ru')">RU</button>
                   <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'en'" (click)="settingsControls.language.setValue('en')">EN</button>
-                  <button type="button" class="mode-button compact" [class.active]="settingsControls.language.value === 'zh'" (click)="settingsControls.language.setValue('zh')">中文</button>
-                </div>
-              </div>
-              <div class="field">
-                <span class="field-label">{{ t('currency') }}</span>
-                <div class="mode-toggle">
-                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'RUB'" (click)="settingsControls.currency.setValue('RUB')">₽</button>
-                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'USD'" (click)="settingsControls.currency.setValue('USD')">$</button>
-                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'EUR'" (click)="settingsControls.currency.setValue('EUR')">€</button>
-                  <button type="button" class="mode-button compact" [class.active]="settingsControls.currency.value === 'CNY'" (click)="settingsControls.currency.setValue('CNY')">¥</button>
                 </div>
               </div>
             </div>
@@ -233,6 +225,30 @@ const STORAGE_KEYS = {
             <div class="checkbox-field">
               <input type="checkbox" id="start-from-sunday" formControlName="startFromSunday" />
               <label for="start-from-sunday">{{ t('startFromSunday') }}</label>
+            </div>
+
+            <div class="field">
+              <span class="field-label">{{ t('visibleBlocks') }}</span>
+            </div>
+
+            <div class="checkbox-field">
+              <input type="checkbox" id="show-earned" formControlName="showEarned" />
+              <label for="show-earned">{{ t('showEarned') }}</label>
+            </div>
+
+            <div class="checkbox-field">
+              <input type="checkbox" id="show-worked" formControlName="showWorked" />
+              <label for="show-worked">{{ t('showWorked') }}</label>
+            </div>
+
+            <div class="checkbox-field">
+              <input type="checkbox" id="show-remaining" formControlName="showRemaining" />
+              <label for="show-remaining">{{ t('showRemaining') }}</label>
+            </div>
+
+            <div class="checkbox-field">
+              <input type="checkbox" id="show-possible" formControlName="showPossible" />
+              <label for="show-possible">{{ t('showPossible') }}</label>
             </div>
 
             <button type="button" class="primary-button" (click)="saveSettings()">{{ t('save') }}</button>
@@ -366,22 +382,28 @@ export class App {
 
   // Earnings form (основная форма с сохранёнными значениями)
   earningsForm = this.fb.nonNullable.group({
-    language: ['ru' as SupportedLang],
-    currency: ['RUB'],
+    language: [this.getDefaultLanguage()],
     hourlyRate: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
     hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
     includeWeekends: [false],
-    startFromSunday: [false]
+    startFromSunday: [false],
+    showEarned: [true],
+    showWorked: [true],
+    showRemaining: [true],
+    showPossible: [true]
   });
 
   // Settings form (временная форма для диалога)
   settingsForm = this.fb.nonNullable.group({
-    language: ['ru' as SupportedLang],
-    currency: ['RUB'],
+    language: [this.getDefaultLanguage()],
     hourlyRate: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
     hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
     includeWeekends: [false],
-    startFromSunday: [false]
+    startFromSunday: [false],
+    showEarned: [true],
+    showWorked: [true],
+    showRemaining: [true],
+    showPossible: [true]
   });
 
   get settingsControls() {
@@ -439,32 +461,24 @@ export class App {
     const lang = this.translationService.currentLang();
     const startFromSunday = this.controls.startFromSunday.value;
     if (startFromSunday) {
-      if (lang === 'en') return WEEKDAY_LABELS_EN_SUN;
-      if (lang === 'zh') return WEEKDAY_LABELS_ZH_SUN;
-      return WEEKDAY_LABELS_RU_SUN;
+      return lang === 'en' ? WEEKDAY_LABELS_EN_SUN : WEEKDAY_LABELS_RU_SUN;
     }
-    if (lang === 'en') return WEEKDAY_LABELS_EN;
-    if (lang === 'zh') return WEEKDAY_LABELS_ZH;
-    return WEEKDAY_LABELS_RU;
+    return lang === 'en' ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_RU;
   });
 
   readonly selectedMonthLabel = computed(() => {
     const month = this.selectedMonth();
     const lang = this.translationService.currentLang();
-    const monthName = month.toLocaleString(lang === 'zh' ? 'zh-CN' : lang === 'en' ? 'en-US' : 'ru-RU', { month: 'long', year: 'numeric' });
+    const monthName = month.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU', { month: 'long', year: 'numeric' });
     return monthName.charAt(0).toUpperCase() + monthName.slice(1);
   });
 
   readonly selectedDayLabel = computed(() => {
     const date = parseLocalDate(this.selectedDate());
     const lang = this.translationService.currentLang();
-    return date.toLocaleString(lang === 'zh' ? 'zh-CN' : lang === 'en' ? 'en-US' : 'ru-RU', { weekday: 'long', month: 'short', day: 'numeric' });
+    return date.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU', { weekday: 'long', month: 'short', day: 'numeric' });
   });
 
-  readonly selectedCurrency = computed(() => {
-    this.formValue();
-    return this.controls.currency.value;
-  });
 
   readonly possibleHourlyRate = computed(() => {
     this.formValue();
@@ -476,16 +490,6 @@ export class App {
     return parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 8;
   });
 
-  readonly currencyDisplay = computed(() => 'symbol-narrow');
-  readonly currencyDigits = computed(() => '1.0-0');
-
-  readonly currencyLocale = computed(() => {
-    const currency = this.selectedCurrency();
-    if (currency === 'CNY') return 'zh-CN';
-    if (currency === 'USD') return 'en-US';
-    if (currency === 'EUR') return 'de-DE';
-    return 'ru-RU';
-  });
 
   readonly possibleRemainingPotential = computed(() => {
     const remainingDays = this.remainingDaysInMonth();
@@ -610,6 +614,13 @@ export class App {
     return this.translationService.t(key);
   }
 
+  private getDefaultLanguage(): SupportedLang {
+    if (typeof navigator === 'undefined') return 'ru';
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('en')) return 'en';
+    return 'ru';
+  }
+
   setLanguage(lang: SupportedLang) {
     this.settingsControls.language.setValue(lang);
   }
@@ -658,7 +669,7 @@ export class App {
     const month = this.selectedMonth();
     const yearMonth = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
     const lang = this.translationService.currentLang();
-    const locale = lang === 'zh' ? 'zh-CN' : lang === 'en' ? 'en-US' : 'ru-RU';
+    const locale = lang === 'en' ? 'en-US' : 'ru-RU';
 
     const monthTasks = tasks.filter((t) => t.date.startsWith(yearMonth));
 
@@ -666,7 +677,7 @@ export class App {
     const monthLabel = this.selectedMonthLabel();
 
     let text = `${monthLabel}\n`;
-    text += `${this.t('earned')}: ${summary.amountEarned}${this.getCurrencySymbol()}, ${this.t('worked').toLowerCase()}: ${this.formatHoursAndMinutes(summary.hoursWorked)}\n\n`;
+    text += `${this.t('earned')}: ${summary.amountEarned} ${this.getCurrencySymbol()}, ${this.t('worked').toLowerCase()}: ${this.formatHoursAndMinutes(summary.hoursWorked)}\n\n`;
 
     const groupedByDate = monthTasks.reduce((acc, task) => {
       if (!acc[task.date]) acc[task.date] = [];
@@ -790,11 +801,8 @@ export class App {
   }
 
   getCurrencySymbol(): string {
-    const currency = this.selectedCurrency();
-    if (currency === 'CNY') return '¥';
-    if (currency === 'USD') return '$';
-    if (currency === 'EUR') return '€';
-    return '₽';
+    const lang = this.translationService.currentLang();
+    return lang === 'en' ? 'c.u.' : 'у.е.';
   }
 
   shouldShowDayIndicator(iso: string): boolean {
@@ -819,7 +827,7 @@ export class App {
 
     let tooltip = this.formatHoursAndMinutes(totalHours);
     if (hourlyRate > 0) {
-      tooltip += ` • ${earned}${this.getCurrencySymbol()}`;
+      tooltip += ` • ${earned} ${this.getCurrencySymbol()}`;
     }
     return tooltip;
   }

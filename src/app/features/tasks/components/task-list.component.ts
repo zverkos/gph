@@ -11,7 +11,7 @@ import { parseLocalDate } from '../../../utils/date.utils';
       <ul class="task-list">
         @for (task of tasks(); track task.id; let i = $index) {
           @if (groupByDate() && shouldShowDateHeader(i)) {
-            <li class="date-header">{{ formatDate(task.date) }}</li>
+            <li class="date-header">{{ formatDate(task.date) }} <span class="date-hours">({{ getDayTotalHours(task.date) }})</span></li>
           }
           <li>
             <div class="task-checkbox">
@@ -77,11 +77,21 @@ export class TaskListComponent {
   formatDate(iso: string): string {
     const date = parseLocalDate(iso);
     const lang = this.translationService.currentLang();
-    return date.toLocaleDateString(lang === 'zh' ? 'zh-CN' : lang === 'en' ? 'en-US' : 'ru-RU', { 
+    return date.toLocaleDateString(lang === 'en' ? 'en-US' : 'ru-RU', { 
       weekday: 'long', 
       day: 'numeric', 
       month: 'short' 
     });
+  }
+
+  getDayTotalHours(iso: string): string {
+    const tasks = this.tasks();
+    const dayTasks = tasks.filter(t => t.date === iso);
+    const totalMinutes = dayTasks.reduce((sum, t) => sum + t.hours * 60 + t.minutes, 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (minutes === 0) return `${hours} ${this.t('hours')}`;
+    return `${hours} ${this.t('hours')} ${minutes} ${this.t('minutes')}`;
   }
 
   shouldShowDateHeader(index: number): boolean {

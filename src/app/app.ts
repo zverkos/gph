@@ -30,7 +30,7 @@ const WEEKDAY_LABELS_EN_SUN: ReadonlyArray<string> = ['Sun', 'Mon', 'Tue', 'Wed'
 const WEEKDAY_LABELS_ZH_SUN: ReadonlyArray<string> = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 const DECIMAL_INPUT_PATTERN = /^$|^\d+(?:,\d+)?$/;
-type EarningsControlName = 'hourlyRate' | 'hoursWorked' | 'desiredMonthlyIncome' | 'hoursPerDay';
+type EarningsControlName = 'hourlyRate' | 'hoursWorked' | 'hoursPerDay';
 
 const STORAGE_KEYS = {
   EARNINGS_FORM: 'gph_earnings_form'
@@ -110,7 +110,7 @@ const STORAGE_KEYS = {
             <p class="stat-card-label">{{ t('earned') }}</p>
             <p class="stat-card-value">
               {{ summary().amountEarned | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}
-              <span class="stat-card-sub">{{ t('of') }} {{ summary().desiredMonthlyIncome | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}</span>
+              <span class="stat-card-sub">{{ t('of') }} {{ summary().maxPossibleIncome | currency:selectedCurrency():currencyDisplay():currencyDigits():currencyLocale() }}</span>
             </p>
             <div class="progress">
               <div class="progress-fill" [style.width.%]="summary().progress"></div>
@@ -120,9 +120,7 @@ const STORAGE_KEYS = {
             <p class="stat-card-label">{{ t('worked') }}</p>
             <p class="stat-card-value">
               {{ formatHoursAndMinutes(summary().hoursWorked) }}
-              @if (summary().totalHoursNeeded !== null) {
-                <span class="stat-card-sub">{{ t('of') }} {{ formatHoursAndMinutes(summary().totalHoursNeeded ?? 0) }}</span>
-              }
+              <span class="stat-card-sub">{{ t('of') }} {{ formatHoursAndMinutes(summary().totalHoursNeeded) }}</span>
             </p>
           </article>
           @if (remainingDaysInMonth() > 0) {
@@ -223,26 +221,9 @@ const STORAGE_KEYS = {
             </div>
 
             <div class="field">
-              <span class="field-label">{{ t('calculationMode') }}</span>
-              <div class="mode-toggle">
-                <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'income'" (click)="settingsControls.calculationMode.setValue('income')">{{ t('byIncome') }}</button>
-                <button type="button" class="mode-button" [class.active]="settingsControls.calculationMode.value === 'hours'" (click)="settingsControls.calculationMode.setValue('hours')">{{ t('byHours') }}</button>
-              </div>
+              <span class="field-label">{{ t('hoursPerDay') }}</span>
+              <input type="text" inputmode="decimal" formControlName="hoursPerDay" placeholder="0" />
             </div>
-
-            @if (settingsControls.calculationMode.value === 'income') {
-              <div class="field">
-                <span class="field-label">{{ t('desiredIncome') }}</span>
-                <input type="text" inputmode="decimal" formControlName="desiredMonthlyIncome" placeholder="0" />
-              </div>
-            }
-
-            @if (settingsControls.calculationMode.value === 'hours') {
-              <div class="field">
-                <span class="field-label">{{ t('hoursPerDay') }}</span>
-                <input type="text" inputmode="decimal" formControlName="hoursPerDay" placeholder="0" />
-              </div>
-            }
 
             <div class="checkbox-field">
               <input type="checkbox" id="include-weekends" formControlName="includeWeekends" />
@@ -385,11 +366,9 @@ export class App {
 
   // Earnings form (основная форма с сохранёнными значениями)
   earningsForm = this.fb.nonNullable.group({
-    calculationMode: ['income' as 'income' | 'hours'],
     language: ['ru' as SupportedLang],
     currency: ['RUB'],
     hourlyRate: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
-    desiredMonthlyIncome: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
     hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
     includeWeekends: [false],
     startFromSunday: [false]
@@ -397,11 +376,9 @@ export class App {
 
   // Settings form (временная форма для диалога)
   settingsForm = this.fb.nonNullable.group({
-    calculationMode: ['income' as 'income' | 'hours'],
     language: ['ru' as SupportedLang],
     currency: ['RUB'],
     hourlyRate: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
-    desiredMonthlyIncome: ['', [Validators.pattern(DECIMAL_INPUT_PATTERN)]],
     hoursPerDay: ['', [Validators.pattern(/^\d+(\.\d+)?$/)]],
     includeWeekends: [false],
     startFromSunday: [false]
@@ -411,9 +388,6 @@ export class App {
     return this.settingsForm.controls;
   }
 
-  readonly settingsFormMode = computed(() => {
-    return this.settingsControls.calculationMode.value as 'income' | 'hours';
-  });
 
   get controls() {
     return this.earningsForm.controls;
@@ -425,10 +399,6 @@ export class App {
   });
 
   // Computed signals
-  readonly calculationMode = computed(() => {
-    this.formValue();
-    return this.controls.calculationMode.value as 'income' | 'hours';
-  });
 
   readonly selectedDayTasks = computed(() =>
     this.taskStore.tasksByDate(this.selectedDate())()
@@ -569,13 +539,8 @@ export class App {
   readonly isSettingsIncomplete = computed(() => {
     this.formValue();
     const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
-    if (this.calculationMode() === 'income') {
-      const desiredIncome = parseFloat(String(this.controls.desiredMonthlyIncome.value).replace(',', '.')) || 0;
-      return hourlyRate === 0 || desiredIncome === 0;
-    } else {
-      const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 0;
-      return hoursPerDay === 0;
-    }
+    const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 0;
+    return hourlyRate === 0 || hoursPerDay === 0;
   });
 
   readonly summary = computed(() => {
@@ -588,24 +553,18 @@ export class App {
 
     const hoursWorked = monthTasks.reduce((sum, t) => sum + getTotalHours(t), 0);
     const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
-    const desiredIncome = parseFloat(String(this.controls.desiredMonthlyIncome.value).replace(',', '.')) || 0;
     const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 8;
 
     const amountEarned = Math.round(hoursWorked * hourlyRate);
-    let totalHoursNeeded: number | null = null;
-
-    if (this.calculationMode() === 'income') {
-      totalHoursNeeded = desiredIncome > 0 && hourlyRate > 0 ? desiredIncome / hourlyRate : null;
-    } else {
-      totalHoursNeeded = this.workingDaysInMonth() * hoursPerDay;
-    }
+    const totalHoursNeeded = this.workingDaysInMonth() * hoursPerDay;
+    const maxPossibleIncome = Math.round(hourlyRate * totalHoursNeeded);
 
     const progress = totalHoursNeeded ? Math.min(Math.round((hoursWorked / totalHoursNeeded) * 100), 100) : 0;
 
     return {
       hoursWorked,
       amountEarned,
-      desiredMonthlyIncome: desiredIncome,
+      maxPossibleIncome,
       totalHoursNeeded,
       progress
     };
@@ -846,19 +805,8 @@ export class App {
   isDayGoalMet(iso: string): boolean {
     this.formValue();
     const totalHours = this.taskStore.totalHoursByDate(iso);
-    const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
-
-    if (this.calculationMode() === 'income') {
-      const desiredIncome = parseFloat(String(this.controls.desiredMonthlyIncome.value).replace(',', '.')) || 0;
-      const workingDays = this.workingDaysInMonth();
-      if (workingDays === 0 || desiredIncome === 0 || hourlyRate === 0) return false;
-      const dailyIncomeNeeded = desiredIncome / workingDays;
-      const dailyIncomeEarned = totalHours * hourlyRate;
-      return dailyIncomeEarned >= dailyIncomeNeeded;
-    } else {
-      const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 8;
-      return totalHours >= hoursPerDay;
-    }
+    const hoursPerDay = parseFloat(String(this.controls.hoursPerDay.value).replace(',', '.')) || 8;
+    return totalHours >= hoursPerDay;
   }
 
   getDayTooltip(iso: string): string {

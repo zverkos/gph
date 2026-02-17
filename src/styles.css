@@ -50,19 +50,22 @@ body {
 /* ===================== */
 /* Task Form Component   */
 /* ===================== */
-.task-form {
+.task-form,
+.labor-cost-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.task-form label {
+.task-form label,
+.labor-cost-form label {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
-.task-form .field-label {
+.task-form .field-label,
+.labor-cost-form .field-label {
   font-weight: 500;
   font-size: 0.85rem;
   color: var(--muted);
@@ -70,7 +73,10 @@ body {
 
 .task-form input[type='text'],
 .task-form input[type='date'],
-.task-form textarea {
+.task-form textarea,
+.labor-cost-form input[type='text'],
+.labor-cost-form input[type='date'],
+.labor-cost-form textarea {
   border: 1.5px solid var(--border-light);
   border-radius: 0.85rem;
   padding: 0.65rem 0.85rem;
@@ -84,7 +90,10 @@ body {
 
 .task-form input[type='text']:focus,
 .task-form input[type='date']:focus,
-.task-form textarea:focus {
+.task-form textarea:focus,
+.labor-cost-form input[type='text']:focus,
+.labor-cost-form input[type='date']:focus,
+.labor-cost-form textarea:focus {
   outline: none;
   border-color: var(--primary);
   background: var(--background);
@@ -92,18 +101,21 @@ body {
 }
 
 /* Стили для иконки date picker */
-.task-form input[type='date']::-webkit-calendar-picker-indicator {
+.task-form input[type='date']::-webkit-calendar-picker-indicator,
+.labor-cost-form input[type='date']::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.6;
   transition: opacity 0.2s;
   filter: invert(0);
 }
 
-.task-form input[type='date']::-webkit-calendar-picker-indicator:hover {
+.task-form input[type='date']::-webkit-calendar-picker-indicator:hover,
+.labor-cost-form input[type='date']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
-[data-color-scheme="dark"] .task-form input[type='date']::-webkit-calendar-picker-indicator {
+[data-color-scheme="dark"] .task-form input[type='date']::-webkit-calendar-picker-indicator,
+[data-color-scheme="dark"] .labor-cost-form input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
 
@@ -168,7 +180,8 @@ body {
 /* ===================== */
 /* Task List Component   */
 /* ===================== */
-.task-list {
+.task-list,
+.labor-cost-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -178,7 +191,8 @@ body {
   flex: 1;
 }
 
-.task-list li {
+.task-list li,
+.labor-cost-list li {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -188,7 +202,8 @@ body {
   background: rgba(255, 255, 255, 0.6);
 }
 
-[data-color-scheme="dark"] .task-list li {
+[data-color-scheme="dark"] .task-list li,
+[data-color-scheme="dark"] .labor-cost-list li {
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -198,7 +213,8 @@ body {
   font-size: 0.9rem;
 }
 
-.task-list .date-header {
+.task-list .date-header,
+.labor-cost-list .date-header {
   background: transparent !important;
   border: none !important;
   padding: 0.5rem 0 0.25rem !important;
@@ -208,11 +224,13 @@ body {
   text-transform: capitalize;
 }
 
-.task-list .date-header:first-child {
+.task-list .date-header:first-child,
+.labor-cost-list .date-header:first-child {
   padding-top: 0;
 }
 
-[data-color-scheme="dark"] .task-list .date-header {
+[data-color-scheme="dark"] .task-list .date-header,
+[data-color-scheme="dark"] .labor-cost-list .date-header {
   background: transparent !important;
   border: none !important;
 }
@@ -258,23 +276,27 @@ body {
   border-color: transparent !important;
 }
 
-.task-content {
+.task-content,
+.labor-cost-content {
   flex: 1;
   min-width: 0;
 }
 
-.task-title {
+.task-title,
+.labor-cost-title {
   margin: 0;
   font-weight: 600;
 }
 
-.task-meta {
+.task-meta,
+.labor-cost-meta {
   margin: 0.15rem 0 0;
   font-size: 0.85rem;
   color: var(--muted);
 }
 
-.task-link {
+.task-link,
+.labor-cost-link {
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
@@ -283,18 +305,21 @@ body {
   text-decoration: none;
 }
 
-.task-link::after {
+.task-link::after,
+.labor-cost-link::after {
   content: '↗';
   font-size: 0.75rem;
 }
 
-.task-actions {
+.task-actions,
+.labor-cost-actions {
   display: flex;
   gap: 0.25rem;
   flex-shrink: 0;
 }
 
-.task-action-btn {
+.task-action-btn,
+.labor-cost-action-btn {
   border: none;
   background: transparent;
   cursor: pointer;
@@ -307,24 +332,28 @@ body {
   transition: color 0.15s ease, background 0.15s ease;
 }
 
-.task-action-btn:hover {
+.task-action-btn:hover,
+.labor-cost-action-btn:hover {
   color: var(--text-primary);
   background: var(--hover-bg);
 }
 
-.task-action-btn.delete:hover {
+.task-action-btn.delete:hover,
+.labor-cost-action-btn.delete:hover {
   color: #dc2626;
 }
 
 /* ===================== */
 /* Task Checkbox         */
 /* ===================== */
-.task-checkbox {
+.task-checkbox,
+.labor-cost-checkbox {
   display: flex;
   align-items: center;
 }
 
-.task-checkbox input[type="checkbox"] {
+.task-checkbox input[type="checkbox"],
+.labor-cost-checkbox input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   width: 1.25rem;
@@ -341,12 +370,14 @@ body {
   flex-shrink: 0;
 }
 
-.task-checkbox input[type="checkbox"]:checked {
+.task-checkbox input[type="checkbox"]:checked,
+.labor-cost-checkbox input[type="checkbox"]:checked {
   background: var(--primary);
   border-color: var(--primary);
 }
 
-.task-checkbox input[type="checkbox"]:checked::after {
+.task-checkbox input[type="checkbox"]:checked::after,
+.labor-cost-checkbox input[type="checkbox"]:checked::after {
   content: '';
   width: 5px;
   height: 3px;
@@ -357,7 +388,8 @@ body {
   margin-bottom: 1px;
 }
 
-.task-checkbox input[type="checkbox"]:hover {
+.task-checkbox input[type="checkbox"]:hover,
+.labor-cost-checkbox input[type="checkbox"]:hover {
   border-color: var(--primary);
 }
 

@@ -42,6 +42,35 @@
   top: 0;
   z-index: 10;
   background: var(--background);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.list-nav {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--input-background);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+}
+
+.nav-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: var(--background);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: default;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.header-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .month-nav {
@@ -833,8 +862,145 @@ h2 {
   justify-content: space-between;
 }
 
-/* task-form, task-list, time-inputs, primary-button, icon-button
+/* task-form, task-list, labor-cost-form, labor-cost-list, time-inputs, primary-button, icon-button
    стили перенесены в глобальный styles.css */
+
+.labor-cost-list,
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.labor-cost-list > li,
+.task-list > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color 0.15s ease;
+}
+
+.labor-cost-list > li:hover,
+.task-list > li:hover {
+  background: var(--hover-bg);
+}
+
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--panel-background);
+  border-radius: 0.5rem;
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.date-hours {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.labor-cost-checkbox,
+.task-checkbox {
+  margin-top: 0.25rem;
+}
+
+.labor-cost-checkbox input[type="checkbox"],
+.task-checkbox input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.labor-cost-content,
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.labor-cost-title,
+.task-title {
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.labor-cost-meta,
+.task-meta {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.labor-cost-link,
+.task-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.labor-cost-link:hover,
+.task-link:hover {
+  text-decoration: underline;
+}
+
+.labor-cost-actions,
+.task-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.labor-cost-list > li:hover .labor-cost-actions,
+.task-list > li:hover .task-actions {
+  opacity: 1;
+}
+
+.labor-cost-action-btn,
+.task-action-btn {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.labor-cost-action-btn:hover,
+.task-action-btn:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+.labor-cost-action-btn.delete:hover,
+.task-action-btn.delete:hover {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.labor-cost-form,
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
 .form-actions .primary-button,
 .form-actions .ghost-button {

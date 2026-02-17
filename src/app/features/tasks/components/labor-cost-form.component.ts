@@ -1,15 +1,15 @@
 import { Component, ChangeDetectionStrategy, input, output, inject, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TaskEntry } from '../models/task.model';
+import { LaborCostEntry } from '../models/labor-cost.model';
 import { TranslationService } from '../../i18n/translation.service';
 import { parseLocalDate } from '../../../utils/date.utils';
 
 @Component({
-  selector: 'app-task-form',
+  selector: 'app-labor-cost-form',
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form class="task-form" [formGroup]="taskForm" (ngSubmit)="submitTask()">
+    <form class="labor-cost-form" [formGroup]="laborCostForm" (ngSubmit)="submitLaborCost()">
       <label>
         <span class="field-label">{{ t('date') }}</span>
         <input type="date" formControlName="date" />
@@ -41,23 +41,23 @@ import { parseLocalDate } from '../../../utils/date.utils';
         <label for="inTracker">{{ t('inTracker') }}</label>
       </div>
 
-      <button type="submit" class="primary-button" [disabled]="taskForm.invalid">
+      <button type="submit" class="primary-button" [disabled]="laborCostForm.invalid">
         {{ t('addTask') }}
       </button>
     </form>
   `
 })
-export class TaskFormComponent {
+export class LaborCostFormComponent {
   private fb = inject(FormBuilder);
   private translationService = inject(TranslationService);
 
   selectedDate = input.required<string>();
-  taskCreated = output<TaskEntry>();
+  laborCostCreated = output<LaborCostEntry>();
 
-  taskForm = this.fb.nonNullable.group({
+  laborCostForm = this.fb.nonNullable.group({
     date: ['', Validators.required],
     title: ['', Validators.required],
-    hoursPart: ['', [Validators.pattern(/^\d*$/)]],
+    hoursPart: ['', [Validators.required, Validators.pattern(/^\d+$/), Validators.max(24)]],
     minutesPart: ['', [Validators.pattern(/^\d*$/), Validators.max(59)]],
     link: [''],
     inTracker: [false]
@@ -65,43 +65,49 @@ export class TaskFormComponent {
 
   constructor() {
     effect(() => {
-      // Update date field when selectedDate changes
-      const currentDate = this.selectedDate();
-      this.taskForm.patchValue({ date: currentDate });
-      // Reset other fields when date changes
-      this.taskForm.patchValue({
-        title: '',
-        hoursPart: '',
-        minutesPart: '',
-        link: '',
-        inTracker: false
-      });
+      const date = this.selectedDate();
+      this.laborCostForm.patchValue({ date });
     });
   }
 
-  t(key: string): string {
-    return this.translationService.t(key as any);
+  t(key: any): string {
+    return this.translationService.t(key);
   }
 
-  submitTask() {
-    if (this.taskForm.invalid) return;
+  private generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
 
-    const value = this.taskForm.getRawValue();
-    const hours = parseInt(value.hoursPart || '0', 10);
-    const minutes = parseInt(value.minutesPart || '0', 10);
+  submitLaborCost() {
+    if (this.laborCostForm.invalid) return;
 
-    const task: TaskEntry = {
-      id: crypto.randomUUID(),
-      date: value.date,                    // Дата из формы
-      createdAt: new Date().toISOString(), // Время создания
-      title: value.title,
+    const formValue = this.laborCostForm.getRawValue();
+    const hours = parseInt(formValue.hoursPart, 10);
+    const minutes = parseInt(formValue.minutesPart || '0', 10);
+
+    const newLaborCost: LaborCostEntry = {
+      id: this.generateId(),
+      date: formValue.date,
+      title: formValue.title.trim(),
       hours,
       minutes,
-      link: value.link || undefined,
-      inTracker: value.inTracker
+      link: formValue.link || undefined,
+      inTracker: formValue.inTracker,
+      createdAt: new Date().toISOString()
     };
 
-    this.taskCreated.emit(task);
-    this.taskForm.reset({ date: this.selectedDate() });
+    this.laborCostCreated.emit(newLaborCost);
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.laborCostForm.patchValue({
+      title: '',
+      hoursPart: '',
+      minutesPart: '',
+      link: '',
+      inTracker: false
+    });
+    this.laborCostForm.markAsPristine();
   }
 }

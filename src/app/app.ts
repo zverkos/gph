@@ -4,10 +4,10 @@ import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import localeRu from '@angular/common/locales/ru';
 
-import { TaskEntry, getTotalHours } from './features/tasks/models/task.model';
+import { LaborCostEntry, getTotalHours } from './features/tasks/models/labor-cost.model';
 import { TaskStore } from './features/tasks/task-store.service';
-import { TaskFormComponent } from './features/tasks/components/task-form.component';
-import { TaskListComponent } from './features/tasks/components/task-list.component';
+import { LaborCostFormComponent } from './features/tasks/components/labor-cost-form.component';
+import { LaborCostListComponent } from './features/tasks/components/labor-cost-list.component';
 import { TranslationService } from './features/i18n/translation.service';
 import { SupportedLang, TRANSLATIONS } from './features/i18n/translations';
 import { parseLocalDate, toDateKey } from './utils/date.utils';
@@ -36,7 +36,7 @@ const STORAGE_KEYS = {
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ReactiveFormsModule, TaskFormComponent, TaskListComponent],
+  imports: [CommonModule, ReactiveFormsModule, LaborCostFormComponent, LaborCostListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="app-layout">
@@ -151,9 +151,16 @@ const STORAGE_KEYS = {
       <main class="content">
         <section class="list-panel">
           <header class="list-header">
-            <p class="eyebrow">{{ showMonthTasks() ? 'Задачи' : t('dayDetails') }}: {{ tasksListLabel() }}</p>
+            <div class="list-nav">
+              <button type="button" class="nav-tab active">
+                Трудозатраты
+              </button>
+            </div>
+            <div class="header-info">
+              <p class="eyebrow">{{ tasksListLabel() }}</p>
+            </div>
             <div class="header-actions">
-              <button type="button" class="icon-btn" [class.active]="showMonthTasks()" (click)="showMonthTasks.set(!showMonthTasks())" title="Все задачи за месяц">
+              <button type="button" class="icon-btn" [class.active]="showMonthTasks()" (click)="showMonthTasks.set(!showMonthTasks())" title="Все трудозатраты">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               </button>
                             <button type="button" class="icon-btn" (click)="toggleTheme()" [attr.aria-label]="isDarkTheme() ? 'Светлая тема' : 'Темная тема'">
@@ -167,21 +174,20 @@ const STORAGE_KEYS = {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h.08a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.08a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <span class="header-divider"></span>
-              <button type="button" class="add-task-btn" (click)="addTaskDialogOpen.set(true)">
+              <button type="button" class="add-task-btn" (click)="addLaborCostDialogOpen.set(true)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 {{ t('addTask') }}
               </button>
             </div>
           </header>
           <div class="task-list-scroll">
-            <app-task-list
-              [tasks]="displayedTasks()"
+            <app-labor-cost-list
+              [laborCosts]="displayedLaborCosts()"
               [groupByDate]="showMonthTasks()"
-              (taskSelected)="openEditDialog($event)"
-              (taskDeleted)="confirmDeleteTask($event)"
-              (taskUpdated)="updateTask($event)"
-              (addTaskClicked)="addTaskDialogOpen.set(true)">
-            </app-task-list>
+              (laborCostSelected)="openEditDialog($event)"
+              (laborCostDeleted)="confirmDeleteLaborCost($event)"
+              (addLaborCostClicked)="addLaborCostDialogOpen.set(true)">
+            </app-labor-cost-list>
           </div>
         </section>
       </main>
@@ -257,24 +263,24 @@ const STORAGE_KEYS = {
       </div>
     }
 
-    @if (addTaskDialogOpen()) {
-      <div class="settings-backdrop" (click)="addTaskDialogOpen.set(false)">
+    @if (addLaborCostDialogOpen()) {
+      <div class="settings-backdrop" (click)="addLaborCostDialogOpen.set(false)">
         <section class="settings-modal" (click)="$event.stopPropagation()">
           <header class="settings-panel__header">
             <p class="caption">{{ t('newTask') }}</p>
-            <button type="button" class="icon-btn" (click)="addTaskDialogOpen.set(false)" aria-label="Закрыть">
+            <button type="button" class="icon-btn" (click)="addLaborCostDialogOpen.set(false)" aria-label="Закрыть">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </button>
           </header>
-          <app-task-form
+          <app-labor-cost-form
             [selectedDate]="selectedDate()"
-            (taskCreated)="onTaskCreatedFromDialog($event)">
-          </app-task-form>
+            (laborCostCreated)="onLaborCostCreatedFromDialog($event)">
+          </app-labor-cost-form>
         </section>
       </div>
     }
 
-    @if (deleteTaskId()) {
+    @if (deleteLaborCostId()) {
       <div class="settings-backdrop" (click)="cancelDelete()">
         <section class="settings-modal" (click)="$event.stopPropagation()">
           <header class="settings-panel__header">
@@ -285,13 +291,13 @@ const STORAGE_KEYS = {
           </header>
           <div class="dialog-actions">
             <button type="button" class="ghost-button" (click)="cancelDelete()">{{ t('cancel') }}</button>
-            <button type="button" class="danger-button" (click)="doDeleteTask()">{{ t('delete') }}</button>
+            <button type="button" class="danger-button" (click)="doDeleteLaborCost()">{{ t('delete') }}</button>
           </div>
         </section>
       </div>
     }
 
-    @if (editingTask(); as task) {
+    @if (editingLaborCost(); as laborCost) {
       <div class="settings-backdrop" (click)="closeEditDialog()">
         <section class="settings-modal" (click)="$event.stopPropagation()">
           <header class="settings-panel__header">
@@ -348,9 +354,9 @@ export class App {
 
   @HostListener('document:keydown.escape')
   onEscape() {
-    if (this.addTaskDialogOpen()) this.addTaskDialogOpen.set(false);
-    else if (this.editingTask()) this.closeEditDialog();
-    else if (this.deleteTaskId()) this.cancelDelete();
+    if (this.addLaborCostDialogOpen()) this.addLaborCostDialogOpen.set(false);
+    else if (this.editingLaborCost()) this.closeEditDialog();
+    else if (this.deleteLaborCostId()) this.cancelDelete();
     else if (this.settingsOpened()) this.closeSettings();
   }
 
@@ -365,9 +371,9 @@ export class App {
   readonly selectedMonth = signal(this.today());
   readonly isDarkTheme = signal(this.loadTheme() === 'dark');
   readonly settingsOpened = signal(false);
-  readonly deleteTaskId = signal<string | null>(null);
-  readonly editingTask = signal<TaskEntry | null>(null);
-  readonly addTaskDialogOpen = signal(false);
+  readonly deleteLaborCostId = signal<string | null>(null);
+  readonly editingLaborCost = signal<LaborCostEntry | null>(null);
+  readonly addLaborCostDialogOpen = signal(false);
   readonly showMonthTasks = signal(false);
 
   // Edit form
@@ -422,31 +428,35 @@ export class App {
 
   // Computed signals
 
-  readonly selectedDayTasks = computed(() =>
-    this.taskStore.tasksByDate(this.selectedDate())()
+  readonly selectedDayLaborCosts = computed(() =>
+    this.taskStore.laborCostsByDate(this.selectedDate())()
   );
 
-  readonly monthTasks = computed(() => {
+  readonly allLaborCosts = computed(() => {
+    return this.taskStore.tasks().sort((a, b) => b.date.localeCompare(a.date));
+  });
+
+  readonly monthLaborCosts = computed(() => {
     const month = this.selectedMonth();
     const year = month.getFullYear();
     const m = month.getMonth();
     const firstDay = new Date(year, m, 1);
     const lastDay = new Date(year, m + 1, 0);
-    const tasks: TaskEntry[] = [];
+    const laborCosts: LaborCostEntry[] = [];
     for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
       const iso = this.getIsoString(d);
-      tasks.push(...this.taskStore.tasksByDate(iso)());
+      laborCosts.push(...this.taskStore.laborCostsByDate(iso)());
     }
-    return tasks;
+    return laborCosts;
   });
 
-  readonly displayedTasks = computed(() =>
-    this.showMonthTasks() ? this.monthTasks() : this.selectedDayTasks()
+  readonly displayedLaborCosts = computed(() =>
+    this.showMonthTasks() ? this.allLaborCosts() : this.selectedDayLaborCosts()
   );
 
   readonly tasksListLabel = computed(() => {
     if (this.showMonthTasks()) {
-      return this.selectedMonthLabel();
+      return 'Все трудозатраты';
     }
     return this.selectedDayLabel();
   });
@@ -553,7 +563,7 @@ export class App {
     const month = this.selectedMonth();
     const yearMonth = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
 
-    const monthTasks = tasks.filter((t) => t.date.startsWith(yearMonth));
+    const monthTasks = tasks.filter((t) => t.date && t.date.startsWith(yearMonth));
 
     const hoursWorked = monthTasks.reduce((sum, t) => sum + getTotalHours(t), 0);
     const hourlyRate = parseFloat(String(this.controls.hourlyRate.value).replace(',', '.')) || 0;
@@ -671,7 +681,7 @@ export class App {
     const lang = this.translationService.currentLang();
     const locale = lang === 'en' ? 'en-US' : 'ru-RU';
 
-    const monthTasks = tasks.filter((t) => t.date.startsWith(yearMonth));
+    const monthTasks = tasks.filter((t) => t.date && t.date.startsWith(yearMonth));
 
     const summary = this.summary();
     const monthLabel = this.selectedMonthLabel();
@@ -680,10 +690,10 @@ export class App {
     text += `${this.t('earned')}: ${summary.amountEarned} ${this.getCurrencySymbol()}, ${this.t('worked').toLowerCase()}: ${this.formatHoursAndMinutes(summary.hoursWorked)}\n\n`;
 
     const groupedByDate = monthTasks.reduce((acc, task) => {
-      if (!acc[task.date]) acc[task.date] = [];
-      acc[task.date].push(task);
+      if (task.date && !acc[task.date]) acc[task.date] = [];
+      if (task.date) acc[task.date].push(task);
       return acc;
-    }, {} as Record<string, TaskEntry[]>);
+    }, {} as Record<string, LaborCostEntry[]>);
 
     const sortedDates = Object.keys(groupedByDate).sort();
     for (const dateKey of sortedDates) {
@@ -706,7 +716,7 @@ export class App {
   }
 
   shareDayResults() {
-    const tasks = this.selectedDayTasks();
+    const tasks = this.selectedDayLaborCosts();
     if (!tasks.length) return;
 
     const dayLabel = this.selectedDayLabel();
@@ -725,58 +735,58 @@ export class App {
     });
   }
 
-  onTaskCreated(task: TaskEntry) {
-    this.taskStore.add(task);
+  onLaborCostCreated(laborCost: LaborCostEntry) {
+    this.taskStore.add(laborCost);
   }
 
-  onTaskCreatedFromDialog(task: TaskEntry) {
-    this.taskStore.add(task);
-    this.addTaskDialogOpen.set(false);
+  onLaborCostCreatedFromDialog(laborCost: LaborCostEntry) {
+    this.taskStore.add(laborCost);
+    this.addLaborCostDialogOpen.set(false);
   }
 
-  confirmDeleteTask(id: string) {
-    this.deleteTaskId.set(id);
+  confirmDeleteLaborCost(id: string) {
+    this.deleteLaborCostId.set(id);
   }
 
   cancelDelete() {
-    this.deleteTaskId.set(null);
+    this.deleteLaborCostId.set(null);
   }
 
-  doDeleteTask() {
-    const id = this.deleteTaskId();
+  doDeleteLaborCost() {
+    const id = this.deleteLaborCostId();
     if (id) {
       this.taskStore.remove(id);
-      this.deleteTaskId.set(null);
+      this.deleteLaborCostId.set(null);
     }
   }
 
-  updateTask(event: { id: string; patch: Partial<TaskEntry> }) {
+  updateLaborCost(event: { id: string; patch: Partial<LaborCostEntry> }) {
     this.taskStore.update(event.id, event.patch);
   }
 
-  openEditDialog(task: TaskEntry) {
+  openEditDialog(laborCost: LaborCostEntry) {
     this.editForm.patchValue({
-      date: task.date,
-      title: task.title,
-      hoursPart: task.hours.toString(),
-      minutesPart: task.minutes.toString(),
-      link: task.link || '',
-      inTracker: task.inTracker
+      date: laborCost.date || '',
+      title: laborCost.title,
+      hoursPart: laborCost.hours.toString(),
+      minutesPart: laborCost.minutes.toString(),
+      link: laborCost.link || '',
+      inTracker: laborCost.inTracker
     });
-    this.editingTask.set(task);
+    this.editingLaborCost.set(laborCost);
   }
 
   closeEditDialog() {
-    this.editingTask.set(null);
+    this.editingLaborCost.set(null);
   }
 
   saveEditedTask() {
-    const task = this.editingTask();
-    if (!task) return;
+    const laborCost = this.editingLaborCost();
+    if (!laborCost) return;
     const value = this.editForm.getRawValue();
     const hours = parseInt(value.hoursPart || '0', 10);
     const minutes = parseInt(value.minutesPart || '0', 10);
-    this.taskStore.update(task.id, {
+    this.taskStore.update(laborCost.id, {
       date: value.date,
       title: value.title,
       hours,
@@ -784,7 +794,7 @@ export class App {
       link: value.link || undefined,
       inTracker: value.inTracker
     });
-    this.editingTask.set(null);
+    this.editingLaborCost.set(null);
   }
 
   formatHoursAndMinutes(hours: number): string {
